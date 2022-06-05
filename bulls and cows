@@ -1,0 +1,125 @@
+package bullscows;
+
+import java.util.*;
+
+public class Main {
+    static String secretCode = "";
+    static int codeLength;
+    static int numberPossibleSymbols;
+
+    public static void main(String[] args) {
+        secretCode = SetSecretCode();
+        if (!secretCode.equals("Error")) {
+            System.out.println(secretCode);
+            gameBody();
+        }
+    }
+
+    static String SetSecretCode() {
+        Scanner scanner = new Scanner(System.in);
+        Random random = new Random();
+        String inputString;
+        System.out.println("Please, enter the secret code's length:");
+        inputString = scanner.nextLine();
+        if (inputString.matches("\\d+")) {
+            codeLength = Integer.parseInt(inputString);
+        } else {
+            System.out.printf("Error: \"%s\" isn't a valid number.", inputString);
+            return "Error";
+        }
+        StringBuilder randomNumber = new StringBuilder();
+        if (codeLength > 36 || codeLength < 1) {
+            System.out.printf("Error: %s is wrong code length.%n", inputString);
+            return "Error";
+        }
+
+        System.out.println("Input the number of possible symbols in the code:");
+        inputString = scanner.nextLine();
+        if (inputString.matches("\\d+")) {
+            numberPossibleSymbols = Integer.parseInt(inputString);
+        } else {
+            System.out.printf("Error: \"%s\" isn't a valid number.", inputString);
+            return "Error";
+        }
+        if (numberPossibleSymbols < codeLength) {
+            System.out.printf("Error: it's not possible to generate a code with a length of %d with %d unique symbols.%n",
+                    codeLength, numberPossibleSymbols);
+            return "Error";
+        }
+        if (numberPossibleSymbols > 36) {
+            System.out.println("Error: maximum number of possible symbols in the code is 36 (0-9, a-z).");
+            return "Error";
+        }
+
+        System.out.print("The secret is prepared: ");
+        for (int i = 0; i < codeLength; i++) {
+            System.out.print("*");
+        }
+        if (numberPossibleSymbols <= 10) {
+            System.out.printf(" (0-%d).", numberPossibleSymbols - 1);
+        } else {
+            System.out.printf(" (0-9, a-%c).%n", (char) numberPossibleSymbols + 86);
+        }
+        int numOne = random.nextInt(numberPossibleSymbols - 1) + 1;
+        randomNumber.append(numOne < 10 ? (char) (numOne + 48) : (char) (numOne + 87));
+        for (int i = 0; i < codeLength; i++) {
+            int oneRandDigit;
+            while (randomNumber.length() != i + 1) {
+                oneRandDigit = random.nextInt(numberPossibleSymbols);
+                if (randomNumber.indexOf(String.valueOf((char) oneRandDigit < 10 ? (char) (oneRandDigit + 48) : (char) (oneRandDigit + 87))) == -1) {
+                    randomNumber.append(oneRandDigit < 10 ? (char) (oneRandDigit + 48) : (char) (oneRandDigit + 87));
+                }
+            }
+        }
+        System.out.println("Okay, let's start a game!");
+        return randomNumber.toString();
+    }
+
+     static void gameBody() {
+        Scanner scanner = new Scanner(System.in);
+        for (int gameTurn = 1; gameTurn < 2000; gameTurn++) {
+            System.out.printf("Turn %d:%n", gameTurn);
+            String code = scanner.nextLine();
+            boolean[] bulls = new boolean[code.length()];
+            boolean[] cows = new boolean[code.length()];
+            int bullsCount = 0;
+            int cowsCount = 0;
+            for (int i = 0; i < code.length(); i++) {
+                for (int j = 0; j < code.length(); j++) {
+                    if (code.charAt(j) == secretCode.charAt(i)) {
+                        cows[i] = true;
+                        break;
+                    }
+                }
+            }
+            for (int i = 0; i < code.length(); i++) {
+                if (code.charAt(i) == secretCode.charAt(i)) {
+                    bulls[i] = true;
+                    cows[i] = false;
+                }
+            }
+            for (int i = 0; i < bulls.length; i++) {
+                if (bulls[i]) {
+                    bullsCount++;
+                }
+                if (cows[i]) {
+                    cowsCount++;
+                }
+            }
+            if (bullsCount != 0 && cowsCount != 0) {
+                System.out.printf("Grade: %d bull(s) and %d cow(s)%n",
+                        bullsCount, cowsCount);
+            } else if (bullsCount != 0) {
+                System.out.printf("Grade: %d bull(s)%n", bullsCount);
+            } else if (cowsCount != 0) {
+                System.out.printf("Grade: %d cow(s)%n", cowsCount);
+            } else {
+                System.out.println("Grade: None");
+            }
+            if (bullsCount == codeLength) {
+                System.out.println("Congratulations! You guessed the secret code.");
+                break;
+            }
+        }
+    }
+}
