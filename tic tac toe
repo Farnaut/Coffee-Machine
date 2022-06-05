@@ -1,0 +1,145 @@
+package tictactoe;
+
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        char[][] arrTictactoe = new char[3][3];
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                arrTictactoe[i][j] = '_';
+            }
+        }
+        int rowX = 0;
+        int rowXv = 0;
+        int rowXd1 = 0;
+        int rowXd2 = 0;
+        int winX = 0;
+
+        int rowO = 0;
+        int rowOv = 0;
+        int rowOd1 = 0;
+        int rowOd2 = 0;
+        int winO = 0;
+        int turn = 1;
+
+        int o = 0;
+        int x = 0;
+        int empt = 0;
+
+        System.out.println("---------");
+        for (int i = 0; i < 3; i++) {
+            System.out.print("| ");
+            for (int j = 0; j < 3; j++) {
+                System.out.print(arrTictactoe[i][j] + " ");
+            }
+            System.out.println("|");
+        }
+        System.out.println("---------");
+
+
+        while (true) {
+            rowXd2 = 0;
+            rowXd1 = 0;
+            rowOd2 = 0;
+            rowOd1 = 0;
+            empt = 0;
+
+            for (int i = 0; i < 3; i++) {
+                rowX = 0;
+                rowO = 0;
+                rowXv = 0;
+                rowOv = 0;
+
+                for (int j = 0; j < 3; j++) {
+                    if (arrTictactoe[i][j] == 'X') {
+                        x++;
+                        rowX++;
+                    } else if (arrTictactoe[i][j] == 'O') {
+                        o++;
+                        rowO++;
+                    } else if (arrTictactoe[i][j] == '_') {
+                        empt++;
+                    }
+                    if (arrTictactoe[j][i] == 'X') {
+                        rowXv++;
+                    } else if (arrTictactoe[j][i] == 'O') {
+                        rowOv++;
+                    }
+                    if (arrTictactoe[i][j] == 'X' && i == j) {
+                        rowXd1++;
+                    } else if (arrTictactoe[i][j] == 'O' && i == j) {
+                        rowOd1++;
+                    }
+                    if (arrTictactoe[i][j] == 'X' && i + j == 2) {
+                        rowXd2++;
+                    } else if (arrTictactoe[i][j] == 'O' && i + j == 2) {
+                        rowOd2++;
+                    }
+                }
+
+                if (rowX == 3 || rowXv == 3 || rowXd1 == 3 || rowXd2 == 3) {
+                    winX = 1;
+                } else if (rowO == 3 || rowOv == 3 || rowOd1 == 3 || rowOd2 == 3) {
+                    winO = 1;
+                }
+
+
+            }
+
+
+
+            if (winX == 1) {
+                System.out.println("X wins");
+                break;
+            } else if (winO == 1) {
+                System.out.println("O wins");
+                break;
+            } else if (empt == 0) {
+                System.out.println("Draw");
+                break;
+            }
+
+            String vvodCoord1;
+            String vvodCoord2;
+            int vert;
+            int goriz;
+            while (true) {
+                System.out.print("Enter the coordinates:");
+                vvodCoord1 = scanner.next();
+                vvodCoord2 = scanner.next();
+                if (!vvodCoord1.matches("\\d") || !vvodCoord2.matches("\\d")) {
+                    System.out.println("You should enter numbers!");
+                } else {
+                    vert = Integer.parseInt(vvodCoord1);
+                    goriz = Integer.parseInt(vvodCoord2);
+                    if (vert >= 1 && vert < 4 && goriz >= 1 && goriz < 4) {
+                        if (arrTictactoe[vert - 1][goriz - 1] != '_') {
+                            System.out.println("This cell is occupied! Choose another one!");
+                        } else {
+                            if (turn % 2 == 1) {
+                                arrTictactoe[vert - 1][goriz - 1] = 'X';
+                            } else {
+                                arrTictactoe[vert - 1][goriz - 1] = 'O';
+                            }
+                            turn++;
+                            System.out.println("---------");
+                            for (int i = 0; i < 3; i++) {
+                                System.out.print("| ");
+                                for (int j = 0; j < 3; j++) {
+                                    System.out.print(arrTictactoe[i][j] + " ");
+                                }
+                                System.out.println("|");
+                            }
+                            System.out.println("---------");
+                            break;
+                        }
+                    } else {
+                        System.out.println("Coordinates should be from 1 to 3");
+                    }
+                }
+            }
+        }
+    }
+}
