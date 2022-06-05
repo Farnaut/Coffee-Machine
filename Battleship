@@ -1,0 +1,316 @@
+package battleship;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Scanner;
+
+
+
+public class Main {
+
+    public static void main(String[] args) {
+        Player player1 = new Player(1);
+        Player player2 = new Player(2);
+
+        while (player1.gameOver != 0 && player2.gameOver != 0) {
+            player1.FogOfWarGraphics();
+            System.out.println("---------------------");
+            player1.FieldGraphics();
+            player1.PlayerTurn();
+            player1.fogOfWar[player1.vert][player1.gor] = player2.Damage(player1.vert, player1.gor);
+            promptEnterKey();
+            player2.FogOfWarGraphics();
+            System.out.println("---------------------");
+            player2.FieldGraphics();
+            player2.PlayerTurn();
+            player2.fogOfWar[player1.vert][player1.gor] = player1.Damage(player2.vert, player2.gor);
+            promptEnterKey();
+        }
+    }
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    public static void promptEnterKey() {
+        System.out.println("Press Enter and pass the move to another player");
+        try {
+            System.in.read();
+            System.out.println("...");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+class Player {
+    char[][] battleField = new char[10][10];
+    char[][] fogOfWar = new char[10][10];
+    int turn;
+    int gameOver;
+    int vert;
+    int gor;
+
+    public Player(int turn) {
+        for (char[] chars : battleField) {
+            Arrays.fill(chars, '~');
+        }
+        for (char[] chars : fogOfWar) {
+            Arrays.fill(chars, '~');
+        }
+        this.turn = turn;
+        this.vert = 0;
+        this.gor = 0;
+        this.gameOver = 17;
+        EnteringPositions();
+        Main.promptEnterKey();
+    }
+
+    public void PlayerTurn() {
+        System.out.printf("%n Player %d, it's your turn:%n%n", turn);
+        GameBody();
+    }
+
+    void GameBody() {
+        try (Scanner scanner = new Scanner(System.in)) {
+            String coordinate = scanner.nextLine();
+            System.out.println();
+            while (CoordinateCheck(coordinate)) {
+                coordinate = scanner.nextLine();
+                System.out.println();
+            }
+        }
+    }
+
+    void EnteringPositions() {
+        FieldGraphics();
+        System.out.println("Enter the coordinates of the Aircraft Carrier (5 cells):\n");
+        CreatingShip(5);
+        FieldGraphics();
+        System.out.println("Enter the coordinates of the Battleship (4 cells):\n");
+        CreatingShip(4);
+        FieldGraphics();
+        System.out.println("Enter the coordinates of the Submarine (3 cells):\n");
+        CreatingShip(3);
+        FieldGraphics();
+        System.out.println("Enter the coordinates of the Cruiser (3 cells):\n");
+        CreatingShip(3);
+        FieldGraphics();
+        System.out.println("Enter the coordinates of the Destroyer (2 cells):\n");
+        CreatingShip(2);
+        FieldGraphics();
+    }
+
+    void CreatingShip(int shipLength) {
+        try (Scanner scanner = new Scanner(System.in)) {
+            String firstCoord = scanner.next();
+            String secondCoord = scanner.next();
+            System.out.println();
+            while (CoordinateCheck(firstCoord, secondCoord, shipLength)) {
+                firstCoord = scanner.next();
+                secondCoord = scanner.next();
+                System.out.println();
+            }
+        }
+
+    }
+
+    boolean CoordinateCheck(String firstCoord, String secondCoord, int shipLength) {
+        boolean lengthOfFirsCord = true;
+        boolean lengthOfSecondCord = true;
+
+        //проверка длинны координат
+        if (firstCoord.length() > 3 || firstCoord.length() < 2 || secondCoord.length() > 3 || secondCoord.length() < 2) {
+            System.out.println("Error! Wrong coordinates!\n");
+            return true;
+        }
+        //проверка валидности вертикальной составляющей координат
+        if (firstCoord.charAt(0) < 65 || firstCoord.charAt(0) > 74 || secondCoord.charAt(0) < 64 || secondCoord.charAt(0) > 74) {
+            System.out.println("Error! Wrong coordinates!\n");
+            return true;
+        }
+        //проверка валидности горизонтальной состовляющей координат
+        if (firstCoord.length() < 3) {
+            lengthOfFirsCord = false;
+            if (firstCoord.charAt(1) < 49 || firstCoord.charAt(1) > 57) {
+                System.out.println("Error! Wrong coordinates!\n");
+                return true;
+            }
+        } else if (firstCoord.charAt(1) != 49 || firstCoord.charAt(2) != 48) {
+            System.out.println("Error! Wrong coordinates!\n");
+            return true;
+        }
+        if (secondCoord.length() < 3) {
+            lengthOfSecondCord = false;
+            if (secondCoord.charAt(1) < 49 || secondCoord.charAt(1) > 57) {
+                System.out.println("Error! Wrong coordinates!\n");
+                return true;
+            }
+        } else if (secondCoord.charAt(1) != 49 || secondCoord.charAt(2) != 48) {
+            System.out.println("Error! Wrong coordinates!\n");
+            return true;
+        }
+        //проверка на наклон судна
+        int vertRange = firstCoord.charAt(0) != secondCoord.charAt(0) ? Math.abs(firstCoord.charAt(0) - secondCoord.charAt(0)) + 1 : 0;
+        int gorizRange = !lengthOfFirsCord && !lengthOfSecondCord ? firstCoord.charAt(1) == secondCoord.charAt(1) ? 0 :
+                Math.abs(firstCoord.charAt(1) - secondCoord.charAt(1)) + 1: lengthOfFirsCord && !lengthOfSecondCord ?
+                11 - secondCoord.charAt(1) + 48: !lengthOfFirsCord ? 11 - firstCoord.charAt(1) + 48: 0;
+
+        if (lengthOfFirsCord && lengthOfSecondCord) {
+            if (vertRange == 0) {
+                System.out.println("Error! Wrong length of the ship! Try again:\n");
+                return true;
+            } else if (vertRange != shipLength){
+                System.out.println("Error! Wrong length of the ship! Try again:\n");
+                return true;
+            }
+        } else if (lengthOfFirsCord || lengthOfSecondCord) {
+            if (vertRange != 0 ) {
+                System.out.println("Error! Wrong ship location! Try again:\n");
+                return true;
+            }
+        } else {
+            if (vertRange != 0 && gorizRange != 0) {
+                System.out.println("Error! Wrong ship location! Try again:\n");
+                return true;
+            }
+        }
+        //проверка на длинну судна
+        if (Math.abs(vertRange - gorizRange) != shipLength) {
+            System.out.println("Error! Wrong length of the ship! Try again:\n");
+            return true;
+        }
+        //проверка на соседство
+        int vert1 = firstCoord.charAt(0) - 64;
+        int vert2 = secondCoord.charAt(0) - 64;
+        int gor1 = lengthOfFirsCord ? 10 : firstCoord.charAt(1) - 48;
+        int gor2 = lengthOfSecondCord ? 10 : secondCoord.charAt(1) - 48;
+        for (int i = Math.min(vert1, vert2) - 1; i < Math.max(vert1, vert2); i++) {
+            for (int j = Math.min(gor1, gor2) - 1; j < Math.max(gor1, gor2); j++) {
+
+                for(int lok1 = i == 0 ? 0 : i - 1; i == 9 ? lok1 <= 9 : lok1 <= i + 1; lok1++) {
+                    for(int lok2 = j == 0 ? 0 : j - 1; j == 9 ? lok2 <= 9 : lok2 <= j + 1; lok2++) {
+                        if (battleField[lok1][lok2] == 'O') {
+                            System.out.println("Error! You placed it too close to another one. Try again:\n");
+                            return true;
+                        }
+                    }
+                }
+
+            }
+        }
+        //Размещение корабля
+        for (int i = Math.min(vert1, vert2) - 1; i < Math.max(vert1, vert2); i++) {
+            for (int j = Math.min(gor1, gor2) - 1; j < Math.max(gor1, gor2); j++) {
+                battleField[i][j] = 'O';
+            }
+        }
+        return false;
+    }
+
+    boolean CoordinateCheck(String coordinate) {
+        boolean lengthOfCord = true;
+
+        //проверка длинны координаты
+        if (coordinate.length() > 3 || coordinate.length() < 2) {
+            System.out.println("Error! Wrong coordinates!\n");
+            return true;
+        }
+        //проверка валидности вертикальной составляющей координаты
+        if (coordinate.charAt(0) < 65 || coordinate.charAt(0) > 74) {
+            System.out.println("Error! Wrong coordinates!\n");
+            return true;
+        }
+        //проверка валидности горизонтальной состовляющей координат
+        if (coordinate.length() < 3) {
+            lengthOfCord = false;
+            if (coordinate.charAt(1) < 49 || coordinate.charAt(1) > 57) {
+                System.out.println("Error! Wrong coordinates!\n");
+                return true;
+            }
+        } else if (coordinate.charAt(1) != 49 || coordinate.charAt(2) != 48) {
+            System.out.println("Error! Wrong coordinates!\n");
+            return true;
+        }
+        //проверка на состояние клектки
+        vert = coordinate.charAt(0) - 65;
+        gor = lengthOfCord ? 9 : coordinate.charAt(1) - 49;
+        return false;
+    }
+
+    char Damage(int vert, int gor) {
+        if (battleField[vert][gor] == '~' || battleField[vert][gor] == 'M') {
+            battleField[vert][gor] = 'M';
+            System.out.println("You missed!");
+            return 'M';
+        } else {
+            if (battleField[vert][gor] != 'X') {
+                gameOver = gameOver - 1;
+            }
+            battleField[vert][gor] = 'X';
+            if (gameOver == 0) {
+                System.out.println("You sank the last ship. You won. Congratulations!");
+                return 'X';
+            } else if (SankTheShip(vert, gor)) {
+                System.out.println("You sank a ship! Specify a new target:\n");
+            } else {
+                System.out.println("You hit a ship!\n");
+            }
+            return 'X';
+        }
+    }
+
+    boolean SankTheShip(int vert, int gor) {
+        int i = 1;
+        while (gor - i >= 0 && battleField[vert][gor - i] != 'M' && battleField[vert][gor - i] != '~') {
+            if(battleField[vert][gor - i] == 'O') {
+                return false;
+            }
+            i++;
+        }
+        i = 1;
+        while (vert - i >= 0 && battleField[vert - i][gor] != 'M' && battleField[vert - i][gor] != '~') {
+            if(battleField[vert - i][gor] == 'O') {
+                return false;
+            }
+            i++;
+        }
+        i = 1;
+        while (vert + i < 10 && battleField[vert + i][gor] != 'M' && battleField[vert + i][gor] != '~') {
+            if(battleField[vert + i][gor] == 'O') {
+                return false;
+            }
+            i++;
+        }
+        i = 1;
+        while (gor + i < 10 && battleField[vert][gor + i] != 'M' && battleField[vert][gor + i] != '~') {
+            if(battleField[vert][gor + i] == 'O') {
+                return false;
+            }
+            i++;
+        }
+        return true;
+    }
+
+    void FieldGraphics() {
+        System.out.println();
+        System.out.println(". 1 2 3 4 5 6 7 8 9 10");
+        for(int row = 65; row < 75; row++) {
+            System.out.print((char) row + " ");
+            for (int j = 0; j < battleField.length; j++) {
+                System.out.print(battleField[row - 65][j] +" ");
+            }
+            System.out.println();
+        }
+        System.out.println();
+    }
+
+    void FogOfWarGraphics() {
+        System.out.println(". 1 2 3 4 5 6 7 8 9 10");
+        for(int row = 65; row < 75; row++) {
+            System.out.print((char) row + " ");
+            for (int j = 0; j < fogOfWar.length; j++) {
+                System.out.print(fogOfWar[row - 65][j] +" ");
+            }
+            System.out.println();
+        }
+        System.out.println();
+    }
+}
