@@ -1,0 +1,140 @@
+package cinema;
+
+import java.util.Scanner;
+
+public class Cinema {
+
+    static int[] x, y;
+    static String [][] cinemaScheme;
+    static int action, rows, seats, yourSeatX, yourSeatY, countOfSeats = 0, purchTicket = 0, sits1 = 0, sits2 = 0;
+    static int soldsit1 = 0, soldsit2 = 0;
+    static boolean endOfProgram = true;
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter the number of rows:");
+        rows = scanner.nextInt();
+        System.out.println("Enter the number of seats in each row:");
+        seats = scanner.nextInt();
+        System.out.println();
+        cinemaScheme = new String[rows][seats];
+        x = new int[seats];
+        y = new int[rows];
+
+        for (int i = 0; i < rows; i++) {
+            y[i] = i + 1;
+            for (int j = 0; j < seats; j++) {
+                cinemaScheme[i][j] = "S";
+                countOfSeats++;
+                x[j] = j + 1;
+            }
+        }
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < seats; j++) {
+                if (i < rows / 2) {
+                    sits1++;
+                } else {
+                    if (countOfSeats <= 60) {
+                        sits1++;
+                    } else {
+                        sits2++;
+                    }
+                }
+            }
+        }
+        MainMenu();
+    }
+
+
+    public static void MainMenu() {
+        Scanner scanner = new Scanner(System.in);
+        while (endOfProgram) {
+            System.out.println("1. Show the seats\n2. Buy a ticket\n3. Statistics\n0. Exit");
+            action = scanner.nextInt();
+            System.out.println();
+            switch (action) {
+                case 1:
+                    CinemaDrawing(rows, seats);
+                    break;
+                case 2:
+                    BuyTicket();
+                    break;
+                case 3:
+                    StatMetod();
+                    break;
+                case 0:
+                    endOfProgram = false;
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+
+    public static void CinemaDrawing(int rows, int seats) {
+        System.out.print("\nCinema:\n  ");
+        for (int i = 0; i < seats; i++) {
+            System.out.print(x[i] + " ");
+        }
+        for (int i = 0; i < rows; i++) {
+            System.out.println();
+            for (int j = 0; j < seats; j++) {
+                if (j == 0) {
+                    System.out.print((y[i]) + " ");
+                }
+                System.out.print(cinemaScheme[i][j] + " ");
+            }
+        }
+        System.out.println();
+    }
+
+
+    public  static void BuyTicket() {
+        Scanner scanner = new Scanner(System.in);
+        boolean bying = true;
+        while (bying) {
+            System.out.println("\nEnter a row number:");
+            yourSeatY = scanner.nextInt();
+            System.out.println("Enter a seat number in that row:");
+            yourSeatX = scanner.nextInt();
+
+            if (yourSeatY < 0 || yourSeatX < 0 || yourSeatY > cinemaScheme.length || yourSeatX > cinemaScheme[yourSeatY - 1].length) {
+                System.out.println("\nWrong input!");
+            } else if (!cinemaScheme[yourSeatY - 1][yourSeatX - 1].equals("B")) {
+                cinemaScheme[yourSeatY - 1][yourSeatX - 1] = "B";
+                purchTicket++;
+                bying = false;
+                if (countOfSeats <= 60) {
+                    System.out.println("\nTicket price: $10");
+                    soldsit1++;
+                } else {
+                    if (yourSeatY - 1 < rows / 2) {
+                        System.out.println("\nTicket price: $10");
+                        soldsit1++;
+                    } else {
+                        System.out.println("\nTicket price: $8");
+                        soldsit2++;
+                    }
+                }
+            } else {
+                System.out.println("\nThat ticket has already been purchased!");
+            }
+        }
+    }
+
+
+
+    public static void StatMetod() {
+        System.out.printf("Number of purchased tickets: %d%n", purchTicket);
+        double pers;
+        if (seats != 0) {
+            pers = (float) purchTicket / countOfSeats * 100;
+        } else {
+            pers = 0;
+        }
+        System.out.printf("Percentage: %.2f%%%n", pers);
+        System.out.printf("Current income: $%d%n", soldsit1 * 10 + soldsit2 * 8);
+        System.out.printf("Total income: $%d%n%n", sits1 * 10 + sits2 * 8);
+    }
+}
