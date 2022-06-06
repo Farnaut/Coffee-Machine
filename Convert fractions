@@ -1,0 +1,76 @@
+package converter;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.RoundingMode;
+import java.util.Scanner;
+
+public class Main {
+    static int base;
+    static int target;
+
+    public static void main(String[] args) {
+        Body();
+    }
+
+    static void Body() {
+        Scanner scanner = new Scanner(System.in);
+        while (true) {
+            System.out.println("Enter two numbers in format: {source base} {target base} (To quit type /exit)");
+            String input = scanner.next();
+            if (!input.equals("/exit")) {
+                target = scanner.nextInt();
+                base = Integer.parseInt(input);
+            }
+            if ("/exit".equals(input)) {
+                return;
+            }
+            Operations();
+        }
+    }
+
+    static void Operations() {
+        Scanner scanner = new Scanner(System.in);
+        while (true) {
+            System.out.printf("Enter number in base %d to convert to base %d (To go back type /back) ", base, target);
+            String number = scanner.nextLine();
+            if (number.equals("/back")) {
+                System.out.println();
+                return;
+            }
+            String[] numbers = number.split("\\.");
+            BigDecimal resultInt = BigDecimal.valueOf(Long.parseLong(numbers[0], base));
+            BigInteger operations = resultInt.toBigInteger();
+            StringBuilder targetNumber = new StringBuilder();
+            while (!operations.equals(BigInteger.ZERO)) {
+                if (Integer.parseInt(String.valueOf(operations.remainder(BigInteger.valueOf(target)))) < 10 ) {
+                    targetNumber.append(operations.remainder(BigInteger.valueOf(target)));
+                } else {
+                    targetNumber.append((char) (Integer.parseInt(String.valueOf(operations.remainder(BigInteger.valueOf(target)))) + 55));
+                }
+                operations = operations.divide(BigInteger.valueOf(target));
+            }
+            targetNumber.reverse();
+
+            if (number.contains(".")) {
+                BigDecimal fractionalDecimal = BigDecimal.ZERO.setScale(5, RoundingMode.CEILING);
+                for (int i = 0; i < numbers[1].length(); i++) {
+                    int meh = Character.getNumericValue(numbers[1].charAt(i));
+                    fractionalDecimal = fractionalDecimal.add(BigDecimal.valueOf(meh * Math.pow(base, -(i + 1))));
+                }
+                BigDecimal multiple = new BigDecimal(target).pow(10);
+                fractionalDecimal = fractionalDecimal.multiply(multiple);
+                StringBuilder targetFractionalNumber = new StringBuilder(fractionalDecimal.toBigInteger().toString(target));
+                while (targetFractionalNumber.length() < 11) {
+                    targetFractionalNumber.insert(0, "0");
+                }
+                targetFractionalNumber.insert(targetFractionalNumber.length() - 10, ".");
+                targetFractionalNumber.delete(0, 1);
+                targetFractionalNumber.delete(5, targetFractionalNumber.length() - 1);
+                System.out.print("Conversion result: "+ targetNumber + "" + targetFractionalNumber + "\n");
+            } else {
+                System.out.print("Conversion result: " + targetNumber + "\n");
+            }
+        }
+    }
+}
